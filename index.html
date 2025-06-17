@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soon - Modern Stays & Experiences</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2EC0CE',
+                        'primary-dark': '#1DA1AF',
+                        'primary-light': '#E8F7F9',
+                        'secondary': '#FF9A76',
+                        'success': '#4CAF50',
+                        'dark': '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hero-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .smooth-transition {
+            transition: all 0.3s ease;
+        }
+
+        .category-item:hover .category-icon {
+            transform: scale(1.1);
+        }
+
+        .filter-section {
+            scrollbar-width: thin;
+            scrollbar-color: #2EC0CE #f1f1f1;
+        }
+
+        .filter-section::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .filter-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .filter-section::-webkit-scrollbar-thumb {
+            background-color: #2EC0CE;
+            border-radius: 10px;
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .datepicker-cell.selected,
+        .datepicker-cell.selected:hover {
+            background-color: #2EC0CE !important;
+            color: white !important;
+        }
+
+        .datepicker-cell.range {
+            background-color: #E8F7F9 !important;
+        }
+
+        .amenity-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #E8F7F9;
+            border-radius: 50%;
+            color: #2EC0CE;
+        }
+
+        .sticky-booking-bar {
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .room-type-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #2EC0CE;
+        }
+
+        .review-progress-bar {
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .review-progress-fill {
+            height: 100%;
+            background-color: #2EC0CE;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .nav-tab {
+            position: relative;
+        }
+
+        .nav-tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #2EC0CE;
+        }
+
+        .mobile-filter-panel {
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .mobile-filter-panel.open {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center" onclick="showPage('home')">
+                        <span class="text-primary text-2xl font-bold">Soon</span>
+                    </a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#"
+                        class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 nav-tab active"
+                        onclick="showTab('stays')">Stays</a>
+                    <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 nav-tab"
+                        onclick="showTab('flights')">Flights</a>
+                    <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 nav-tab"
+                        onclick="showTab('rentals')">Car Rentals</a>
+                    <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 nav-tab"
+                        onclick="showTab('experiences')">Experiences</a>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button class="hidden md:block px-4 py-2 text-sm font-medium rounded-full hover:bg-gray-100">
+                        <i class="fas fa-globe mr-2"></i>USD
+                    </button>
+                    <button class="hidden md:block px-4 py-2 text-sm font-medium rounded-full hover:bg-gray-100">
+                        <i class="fas fa-question-circle mr-2"></i>Help
+                    </button>
+                    <button class="hidden md:block px-4 py-2 text-sm font-medium rounded-full hover:bg-gray-100">
+                        List your property
+                    </button>
+
+                    <div class="flex items-center space-x-2 border p-2 rounded-full hover:shadow-md cursor-pointer"
+                        onclick="toggleLoginModal()">
+                        <div class="w-8 h-8 bg-gray-500 rounded-full"></div>
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">Welcome to Soon</h3>
+                        <button onclick="toggleLoginModal()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <button
+                            class="w-full flex items-center justify-center space-x-2 border border-gray-300 rounded-lg py-3 px-4 hover:bg-gray-50">
+                            <i class="fab fa-google text-red-500"></i>
+                            <span>Continue with Google</span>
+                        </button>
+
+                        <button
+                            class="w-full flex items-center justify-center space-x-2 border border-gray-300 rounded-lg py-3 px-4 hover:bg-gray-50">
+                            <i class="fab fa-facebook text-blue-600"></i>
+                            <span>Continue with Facebook</span>
+                        </button>
+
+                        <div class="flex items-center my-4">
+                            <div class="flex-1 border-t border-gray-300"></div>
+                            <span class="px-4 text-gray-500">or</span>
+                            <div class="flex-1 border-t border-gray-300"></div>
+                        </div>
+
+                        <form class="space-y-4">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="email"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+
+                            <div>
+                                <label for="password"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input type="password" id="password"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                Continue
+                            </button>
+                        </form>
+
+                        <p class="text-sm text-center text-gray-600">
+                            Don't have an account? <a href="#" class="text-primary font-medium">Sign up</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Detail Modal -->
+    <div id="propertyModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="modal-overlay absolute inset-0 flex items-start justify-center p-4 pt-10">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl relative">
+                <button onclick="togglePropertyModal()"
+                    class="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+                    <i class="fas fa-times text-gray-600"></i>
+                </button>
+
+                <div class="relative h-96 overflow-hidden rounded-t-xl">
+                    <img id="propertyMainImage"
+                        src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                        alt="Property" class="w-full h-full object-cover">
+                    <div class="absolute bottom-4 left-4 right-4 flex space-x-2 overflow-x-auto pb-2">
+                        <button class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg border-2 border-white"
+                            onclick="changeMainImage('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')">
+                            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                class="w-full h-full object-cover">
+                        </button>
+                        <button class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg"
+                            onclick="changeMainImage('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')">
+                            <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                class="w-full h-full object-cover">
+                        </button>
+                        <button class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg"
+                            onclick="changeMainImage('https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')">
+                            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
+                                class="w-full h-full object-cover">
+                        </button>
+                        <button class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg"
+                            onclick="changeMainImage('https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')">
+                            <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                class="w-full h-full object-cover">
+                        </button>
+                        <button class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg"
+                            onclick="changeMainImage('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')">
+                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                class="w-full h-full object-cover">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-2/3 md:pr-8">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h1 id="propertyTitle" class="text-2xl font-bold">Modern Cabin in the Woods</h1>
+                                    <div class="flex items-center mt-2">
+                                        <div class="flex items-center bg-primary text-white px-2 py-1 rounded mr-2">
+                                            <i class="fas fa-star text-xs mr-1"></i>
+                                            <span class="text-sm">4.92</span>
+                                        </div>
+                                        <span class="text-sm text-gray-600">(128 reviews)</span>
+                                        <span class="text-sm text-gray-600 mx-2">·</span>
+                                        <span class="text-sm text-gray-600">Superhost</span>
+                                        <span class="text-sm text-gray-600 mx-2">·</span>
+                                        <span class="text-sm text-gray-600">Denver, Colorado</span>
+                                    </div>
+                                </div>
+                                <button class="p-2 rounded-full hover:bg-gray-100">
+                                    <i class="far fa-heart text-2xl"></i>
+                                </button>
+                            </div>
+
+                            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 border-b pb-6">
+                                <div class="flex items-center">
+                                    <div class="amenity-icon mr-2">
+                                        <i class="fas fa-home text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Entire home</p>
+                                        <p class="text-sm font-medium">2 guests · 1 bedroom · 1 bed · 1 bath</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="amenity-icon mr-2">
+                                        <i class="fas fa-broom text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Enhanced clean</p>
+                                        <p class="text-sm font-medium">This host committed to rigorous cleaning protocol
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="amenity-icon mr-2">
+                                        <i class="fas fa-map-marker-alt text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Great location</p>
+                                        <p class="text-sm font-medium">90% of recent guests gave 5 stars</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="amenity-icon mr-2">
+                                        <i class="fas fa-calendar-check text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-500">Free cancellation</p>
+                                        <p class="text-sm font-medium">Cancel up to 24 hours before check-in</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 border-b pb-6">
+                                <h2 class="text-xl font-bold mb-4">About this property</h2>
+                                <p class="text-gray-700">
+                                    This modern cabin is the perfect getaway nestled in the woods just outside Denver.
+                                    Enjoy stunning mountain views from the floor-to-ceiling windows, relax in the hot
+                                    tub under the stars, or cozy up by the fireplace. The open-concept living space
+                                    features a fully equipped kitchen, comfortable living area, and a luxurious
+                                    king-size bed.
+                                </p>
+                            </div>
+
+                            <div class="mt-6 border-b pb-6">
+                                <h2 class="text-xl font-bold mb-4">Amenities</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-wifi"></i>
+                                        </div>
+                                        <span>WiFi</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-utensils"></i>
+                                        </div>
+                                        <span>Kitchen</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-hot-tub"></i>
+                                        </div>
+                                        <span>Hot tub</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <span>Fireplace</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-parking"></i>
+                                        </div>
+                                        <span>Free parking</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-snowflake"></i>
+                                        </div>
+                                        <span>Air conditioning</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-tv"></i>
+                                        </div>
+                                        <span>TV</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="amenity-icon mr-3">
+                                            <i class="fas fa-tshirt"></i>
+                                        </div>
+                                        <span>Washer</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 border-b pb-6">
+                                <h2 class="text-xl font-bold mb-4">Availability</h2>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="grid grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
+                                            <input type="text" id="checkinDetail"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
+                                            <input type="text" id="checkoutDetail"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+                                        <select
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                            <option>1 guest</option>
+                                            <option selected>2 guests</option>
+                                            <option>3 guests</option>
+                                            <option>4 guests</option>
+                                            <option>5+ guests</option>
+                                        </select>
+                                    </div>
+                                    <button
+                                        class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                        Check availability
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 border-b pb-6">
+                                <h2 class="text-xl font-bold mb-4">Reviews</h2>
+                                <div class="flex items-center mb-6">
+                                    <div class="text-4xl font-bold mr-4">4.92</div>
+                                    <div>
+                                        <div class="flex items-center mb-1">
+                                            <span class="w-16 text-sm text-gray-600">Cleanliness</span>
+                                            <div class="review-progress-bar w-32 mx-2">
+                                                <div class="review-progress-fill" style="width: 95%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium">4.9</span>
+                                        </div>
+                                        <div class="flex items-center mb-1">
+                                            <span class="w-16 text-sm text-gray-600">Accuracy</span>
+                                            <div class="review-progress-bar w-32 mx-2">
+                                                <div class="review-progress-fill" style="width: 98%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium">5.0</span>
+                                        </div>
+                                        <div class="flex items-center mb-1">
+                                            <span class="w-16 text-sm text-gray-600">Location</span>
+                                            <div class="review-progress-bar w-32 mx-2">
+                                                <div class="review-progress-fill" style="width: 92%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium">4.8</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <div>
+                                        <div class="flex items-center mb-2">
+                                            <div class="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
+                                            <div>
+                                                <h4 class="font-medium">Sarah Johnson</h4>
+                                                <div class="flex items-center text-sm text-gray-500">
+                                                    <span>March 2023</span>
+                                                    <span class="mx-1">·</span>
+                                                    <div class="flex">
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="text-gray-700">
+                                            The cabin was absolutely perfect! The views were breathtaking and the hot
+                                            tub was so relaxing after a day of hiking. The host was very responsive and
+                                            provided great recommendations for local restaurants. We can't wait to come
+                                            back!
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex items-center mb-2">
+                                            <div class="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
+                                            <div>
+                                                <h4 class="font-medium">Michael Chen</h4>
+                                                <div class="flex items-center text-sm text-gray-500">
+                                                    <span>February 2023</span>
+                                                    <span class="mx-1">·</span>
+                                                    <div class="flex">
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                        <i class="fas fa-star text-xs text-primary"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="text-gray-700">
+                                            This was our second stay at this cabin and it was just as wonderful as the
+                                            first time. The location is perfect - secluded enough to feel private but
+                                            close enough to town for convenience. The modern design is beautiful and
+                                            everything was spotless when we arrived.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button class="mt-6 text-primary font-medium">Show all 128 reviews</button>
+                            </div>
+
+                            <div class="mt-6">
+                                <h2 class="text-xl font-bold mb-4">Location</h2>
+                                <div class="h-64 bg-gray-200 rounded-lg mb-4 overflow-hidden">
+                                    <img src="https://maps.googleapis.com/maps/api/staticmap?center=39.7392,-104.9903&zoom=12&size=800x400&maptype=roadmap&markers=color:red%7C39.7392,-104.9903&key=YOUR_API_KEY"
+                                        class="w-full h-full object-cover">
+                                </div>
+                                <p class="text-gray-700 mb-4">
+                                    Located just 30 minutes from downtown Denver, this cabin offers the perfect balance
+                                    of wilderness and accessibility. The property is situated on 5 private acres with
+                                    stunning views of the Rocky Mountains.
+                                </p>
+                                <button class="text-primary font-medium">Show more</button>
+                            </div>
+                        </div>
+
+                        <div class="md:w-1/3 mt-8 md:mt-0">
+                            <div class="sticky top-4">
+                                <div class="border rounded-xl shadow-md p-6">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div>
+                                            <p class="text-xl font-bold">$120 <span
+                                                    class="text-base font-normal text-gray-600">night</span></p>
+                                            <div class="flex items-center text-sm">
+                                                <i class="fas fa-star text-primary mr-1"></i>
+                                                <span>4.92 · 128 reviews</span>
+                                            </div>
+                                        </div>
+                                        <button class="p-2 rounded-full hover:bg-gray-100">
+                                            <i class="far fa-share-square"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="border rounded-lg p-4 mb-4">
+                                        <div class="grid grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label
+                                                    class="block text-xs font-medium text-gray-500 mb-1">CHECK-IN</label>
+                                                <p class="font-medium">Jun 15, 2023</p>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-xs font-medium text-gray-500 mb-1">CHECKOUT</label>
+                                                <p class="font-medium">Jun 20, 2023</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">GUESTS</label>
+                                            <p class="font-medium">2 guests</p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark mb-4">
+                                        Reserve
+                                    </button>
+
+                                    <p class="text-center text-sm text-gray-500 mb-4">You won't be charged yet</p>
+
+                                    <div class="space-y-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">$120 x 5 nights</span>
+                                            <span>$600</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Cleaning fee</span>
+                                            <span>$75</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Service fee</span>
+                                            <span>$90</span>
+                                        </div>
+                                        <div class="flex justify-between border-t pt-3 font-bold">
+                                            <span>Total</span>
+                                            <span>$765</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 border rounded-xl shadow-md p-6">
+                                    <h3 class="font-bold mb-3">Cancellation policy</h3>
+                                    <p class="text-sm text-gray-700 mb-3">
+                                        Free cancellation for 48 hours. After that, cancel before Jun 1 and get a 50%
+                                        refund, minus the service fee.
+                                    </p>
+                                    <button class="text-sm text-primary font-medium">Learn more</button>
+                                </div>
+
+                                <div class="mt-4 border rounded-xl shadow-md p-6">
+                                    <h3 class="font-bold mb-3">Protect your payment</h3>
+                                    <p class="text-sm text-gray-700">
+                                        Always book on Soon to be covered by our Payment Protection policy.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Filter Panel -->
+    <div id="mobileFilterPanel"
+        class="mobile-filter-panel fixed inset-x-0 bottom-0 z-50 bg-white shadow-lg rounded-t-xl p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">Filters</h3>
+            <button onclick="toggleMobileFilters()" class="text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4 max-h-[60vh] overflow-y-auto pb-4">
+            <!-- Price Range -->
+            <div>
+                <h4 class="font-bold mb-2">Price range</h4>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">$0</span>
+                        <span class="text-gray-600">$2,000+</span>
+                    </div>
+                    <input type="range" min="0" max="2000" value="500"
+                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between">
+                        <span class="text-sm font-medium">$0 - $500</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Type -->
+            <div>
+                <h4 class="font-bold mb-2">Property type</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="flex items-center p-2 border border-gray-300 rounded-lg hover:border-primary">
+                        <i class="fas fa-home text-primary mr-2"></i>
+                        <span>House</span>
+                    </button>
+                    <button class="flex items-center p-2 border border-gray-300 rounded-lg hover:border-primary">
+                        <i class="fas fa-building text-primary mr-2"></i>
+                        <span>Apartment</span>
+                    </button>
+                    <button class="flex items-center p-2 border border-gray-300 rounded-lg hover:border-primary">
+                        <i class="fas fa-hotel text-primary mr-2"></i>
+                        <span>Hotel</span>
+                    </button>
+                    <button class="flex items-center p-2 border border-gray-300 rounded-lg hover:border-primary">
+                        <i class="fas fa-igloo text-primary mr-2"></i>
+                        <span>Cabin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rooms and Beds -->
+            <div>
+                <h4 class="font-bold mb-2">Rooms and beds</h4>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">Any</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">1</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">2</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">3</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">4</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">5+</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Beds</label>
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">Any</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">1</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">2</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">3</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">4</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">5+</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">Any</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">1</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">2</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">3</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">4</button>
+                            <button
+                                class="px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-500 whitespace-nowrap">5+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div>
+                <h4 class="font-bold mb-2">Amenities</h4>
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" class="rounded text-primary focus:ring-primary">
+                        <span>WiFi</span>
+                    </label>
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" class="rounded text-primary focus:ring-primary">
+                        <span>Kitchen</span>
+                    </label>
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" class="rounded text-primary focus:ring-primary">
+                        <span>Washer</span>
+                    </label>
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" class="rounded text-primary focus:ring-primary">
+                        <span>Air conditioning</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-between mt-4 pt-4 border-t">
+            <button class="text-primary font-medium">Clear all</button>
+            <button class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark">
+                Show results
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content - Home Page -->
+    <div id="homePage" class="page-content">
+        <!-- Hero Section -->
+        <section class="hero-bg h-96 flex items-center justify-center text-white">
+            <div class="text-center px-4">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Find your next adventure</h1>
+                <p class="text-xl mb-8">Discover unique stays, experiences, and places around the world</p>
+                <div class="max-w-2xl mx-auto bg-white rounded-full shadow-lg overflow-hidden">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="flex-1 border-r border-gray-200">
+                            <input type="text" placeholder="Where are you going?"
+                                class="py-3 px-4 w-full focus:outline-none text-gray-800">
+                        </div>
+                        <div class="flex-1 border-r border-gray-200">
+                            <input type="text" placeholder="Check in - Check out"
+                                class="py-3 px-4 w-full focus:outline-none text-gray-800" id="heroCheckin">
+                        </div>
+                        <div class="flex-1">
+                            <select class="py-3 px-4 w-full focus:outline-none text-gray-800 bg-white">
+                                <option>1 guest</option>
+                                <option>2 guests</option>
+                                <option>3 guests</option>
+                                <option>4 guests</option>
+                                <option>5+ guests</option>
+                            </select>
+                        </div>
+                        <button class="bg-primary text-white px-6 py-3 font-medium hover:bg-primary-dark">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section class="py-4 bg-white border-b sticky top-16 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="filter-section flex space-x-4 overflow-x-auto pb-2">
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-umbrella-beach text-primary mb-1"></i>
+                        <span class="text-xs">Beach</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-mountain text-primary mb-1"></i>
+                        <span class="text-xs">Mountain</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-swimming-pool text-primary mb-1"></i>
+                        <span class="text-xs">Amazing pools</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-home text-primary mb-1"></i>
+                        <span class="text-xs">Tiny homes</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-tree text-primary mb-1"></i>
+                        <span class="text-xs">Treehouses</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-water text-primary mb-1"></i>
+                        <span class="text-xs">Lakefront</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-campground text-primary mb-1"></i>
+                        <span class="text-xs">Camping</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-snowflake text-primary mb-1"></i>
+                        <span class="text-xs">Arctic</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-chess-rook text-primary mb-1"></i>
+                        <span class="text-xs">Castles</span>
+                    </button>
+
+                    <button class="flex flex-col items-center min-w-max px-4 py-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-ellipsis-h text-primary mb-1"></i>
+                        <span class="text-xs">More</span>
+                    </button>
+                </div>
+
+                <div class="mt-4 flex justify-between">
+                    <button onclick="toggleMobileFilters()"
+                        class="md:hidden flex items-center space-x-2 border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium hover:shadow-md">
+                        <i class="fas fa-sliders-h text-gray-600"></i>
+                        <span>Filters</span>
+                    </button>
+                    <button
+                        class="hidden md:flex items-center space-x-2 border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium hover:shadow-md">
+                        <i class="fas fa-sliders-h text-gray-600"></i>
+                        <span>Filters</span>
+                    </button>
+                    <button class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <span>Sort by:</span>
+                        <select class="border-0 focus:ring-0">
+                            <option>Recommended</option>
+                            <option>Price (low to high)</option>
+                            <option>Price (high to low)</option>
+                            <option>Rating</option>
+                        </select>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab Content -->
+        <div id="stays" class="tab-content active">
+            <!-- Property Listings -->
+            <section class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold">Live anywhere</h2>
+                        <div class="hidden md:flex space-x-4">
+                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary">
+                                <span>Map view</span>
+                                <i class="fas fa-map-marked-alt"></i>
+                            </button>
+                            <button class="flex items-center space-x-2 text-gray-700 hover:text-primary">
+                                <span>Save search</span>
+                                <i class="far fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- "Still interested" section -->
+                    <div class="mb-8 bg-primary-light p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg">¿Aún te interesan estos alojamientos?</h3>
+                            <button class="text-primary font-medium">See all</button>
+                        </div>
+                        <p class="text-gray-700 mb-4">Vuelve a explorar las propiedades que guardaste anteriormente.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Saved Property 1 -->
+                            <div class="property-card rounded-xl overflow-hidden shadow-md bg-white smooth-transition cursor-pointer"
+                                onclick="showPropertyDetail('Modern Cabin in the Woods', 120, 4.92, 128)">
+                                <div class="relative h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                        alt="Modern Cabin" class="w-full h-full object-cover">
+                                    <button class="absolute top-2 right-2 text-white">
+                                        <i class="fas fa-heart text-2xl text-red-500"></i>
+                                    </button>
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="font-semibold text-lg">Modern Cabin in the Woods</h3>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-star text-sm text-primary"></i>
+                                            <span class="ml-1 text-sm">4.92</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-500 text-sm mt-1">Denver, Colorado</p>
+                                    <p class="text-gray-500 text-sm">Saved 3 days ago</p>
+                                    <p class="mt-2"><span class="font-semibold">$120</span> night</p>
+                                </div>
+                            </div>
+
+                            <!-- Saved Property 2 -->
+                            <div class="property-card rounded-xl overflow-hidden shadow-md bg-white smooth-transition cursor-pointer"
+                                onclick="showPropertyDetail('Beachfront Villa', 350, 4.85, 92)">
+                                <div class="relative h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+                                        alt="Beach House" class="w-full h-full object-cover">
+                                    <button class="absolute top-2 right-2 text-white">
+                                        <i class="fas fa-heart text-2xl text-red-500"></i>
+                                    </button>
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="font-semibold text-lg">Beachfront Villa</h3>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-star text-sm text-primary"></i>
+                                            <span class="ml-1 text-sm">4.85</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-500 text-sm mt-1">Malibu, California</p>
+                                    <p class="text-gray-500 text-sm">Saved 1 week ago</p>
+                                    <p class="mt-2"><span class="font-semibold">$350</span> night</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Property Card 1 -->
+                        <div class="property-card rounded-xl overflow-hidden shadow-md bg-white smooth-transition cursor-pointer"
+                            onclick="showPropertyDetail('Modern Cabin in the Woods', 120, 4.92, 128)">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Modern Cabin" class="w-full h-full object-cover">
+                                <button class="absolute top-2 right-2 text-white">
+                                    <i class="far fa-heart text-2xl hover:text-red-500"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-semibold text-lg">Modern Cabin in the Woods</h3>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-sm text-primary"></i>
+                                        <span class="ml-1 text-sm">4.92</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mt-1">Denver, Colorado</p>
+                                <p class="text-gray-500 text-sm">Jun 15-20</p>
+                                <p class="mt-2"><span class="font-semibold">$120</span> night</p>
+                            </div>
+                        </div>
+
+                        <!-- Property Card 2 -->
+                        <div class="property-card rounded-xl overflow-hidden shadow-md bg-white smooth-transition cursor-pointer"
+                            onclick="showPropertyDetail('Beachfront Villa', 350, 4.85, 92)">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+                                    alt="Beach House" class="w-full h-full object-cover">
+                                <button class="absolute top-2 right-2 text-white">
+                                    <i class="far fa-heart text-2xl hover:text-red-500"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-semibold text-lg">Beachfront Villa</h3>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-sm text-primary"></i>
+                                        <span class="ml-1 text-sm">4.85</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mt-1">Malibu, California</p>
+                                <p class="text-gray-500 text-sm">Jul 5-10</p>
+                                <p class="mt-2"><span class="font-semibold">$350</span> night</p>
+                            </div>
+                        </div>
+
+                        <!-- Property Card 3 -->
+                        <div class="property-card rounded-xl overflow-hidden shadow-md bg-white smooth-transition cursor-pointer"
+                            onclick="showPropertyDetail('Downtown Loft', 250, 4.78, 76)">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="City Apartment" class="w-full h-full object-cover">
+                                <button class="absolute top-2 right-2 text-white">
+                                    <i class="far fa-heart text-2xl hover:text-red-500"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-semibold text-lg">Downtown Loft</h3>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-sm text-primary"></i>
+                                        <span class="ml-1 text-sm">4.78</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mt-1">New York, NY</p>
+                                <p class="text-gray-500 text-sm">Aug 15-20</p>
+                                <p class="mt-2"><span class="font-semibold">$250</span> night</p>
+                            </div>
+                        </div>
+
+                        <!-- Property Card 4 -->
+                        <div class="property-card rounded-xl overflow-hidden shadow-md bg-white smooth-transition cursor-pointer"
+                            onclick="showPropertyDetail('Countryside Retreat', 180, 4.95, 145)">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Countryside House" class="w-full h-full object-cover">
+                                <button class="absolute top-2 right-2 text-white">
+                                    <i class="far fa-heart text-2xl hover:text-red-500"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-semibold text-lg">Countryside Retreat</h3>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-sm text-primary"></i>
+                                        <span class="ml-1 text-sm">4.95</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mt-1">Tuscany, Italy</p>
+                                <p class="text-gray-500 text-sm">Sep 3-10</p>
+                                <p class="mt-2"><span class="font-semibold">$180</span> night</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button class="px-6 py-3 border border-gray-800 rounded-lg font-medium hover:bg-gray-100">
+                            Show all (200+)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deals Section -->
+            <section class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-2xl font-bold mb-8">Today's best deals</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Deal 1 -->
+                        <div class="border-2 border-secondary rounded-xl overflow-hidden">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Modern House" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-25%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg">Modern House with Pool</h3>
+                                <p class="text-gray-500 text-sm mt-1">Miami, Florida</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <span class="ml-1 text-sm">4.88 (95 reviews)</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <p class="text-gray-500 line-through mr-2">$280</p>
+                                    <p class="font-semibold text-secondary">$210 night</p>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Jun 10-15 · Last booked 2 hours ago</p>
+                            </div>
+                        </div>
+
+                        <!-- Deal 2 -->
+                        <div class="border-2 border-secondary rounded-xl overflow-hidden">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
+                                    alt="Luxury Apartment" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-15%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg">Luxury Downtown Apartment</h3>
+                                <p class="text-gray-500 text-sm mt-1">New York, NY</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <span class="ml-1 text-sm">4.95 (210 reviews)</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <p class="text-gray-500 line-through mr-2">$400</p>
+                                    <p class="font-semibold text-secondary">$340 night</p>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Jul 5-10 · Only 1 left at this price</p>
+                            </div>
+                        </div>
+
+                        <!-- Deal 3 -->
+                        <div class="border-2 border-secondary rounded-xl overflow-hidden">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Beach House" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-30%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg">Beachfront Villa with Private Pool</h3>
+                                <p class="text-gray-500 text-sm mt-1">Malibu, California</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <span class="ml-1 text-sm">4.91 (156 reviews)</span>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <p class="text-gray-500 line-through mr-2">$500</p>
+                                    <p class="font-semibold text-secondary">$350 night</p>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Aug 12-18 · Popular deal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Flights Tab Content -->
+        <div id="flights" class="tab-content">
+            <section class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-2xl font-bold mb-8">Find your perfect flight</h2>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                                <input type="text" placeholder="City or Airport"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                                <input type="text" placeholder="City or Airport"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Departure</label>
+                                <input type="text" placeholder="Select date"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    id="departureDate">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Return</label>
+                                <input type="text" placeholder="Select date"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    id="returnDate">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Travelers</label>
+                                <select
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <option>1 traveler</option>
+                                    <option>2 travelers</option>
+                                    <option>3 travelers</option>
+                                    <option>4 travelers</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="flexibleDates"
+                                    class="rounded text-primary focus:ring-primary">
+                                <label for="flexibleDates" class="ml-2 text-sm text-gray-700">Flexible dates</label>
+                            </div>
+                            <button
+                                class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                Search flights
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Flight Deal 1 -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg smooth-transition">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"
+                                    alt="New York" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-20%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-lg">New York</h3>
+                                    <div class="flex items-center bg-primary text-white px-2 py-1 rounded">
+                                        <i class="fas fa-star text-xs mr-1"></i>
+                                        <span class="text-sm">4.8</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mb-3">From Miami, round trip</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-gray-500 line-through text-sm">$450</p>
+                                        <p class="font-semibold text-secondary">$360</p>
+                                    </div>
+                                    <button class="text-primary font-medium">View deal</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flight Deal 2 -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg smooth-transition">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80"
+                                    alt="Paris" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-15%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-lg">Paris</h3>
+                                    <div class="flex items-center bg-primary text-white px-2 py-1 rounded">
+                                        <i class="fas fa-star text-xs mr-1"></i>
+                                        <span class="text-sm">4.9</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mb-3">From New York, round trip</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-gray-500 line-through text-sm">$850</p>
+                                        <p class="font-semibold text-secondary">$720</p>
+                                    </div>
+                                    <button class="text-primary font-medium">View deal</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flight Deal 3 -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg smooth-transition">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1538970272646-f61fabb3be33?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Tokyo" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-25%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-lg">Tokyo</h3>
+                                    <div class="flex items-center bg-primary text-white px-2 py-1 rounded">
+                                        <i class="fas fa-star text-xs mr-1"></i>
+                                        <span class="text-sm">4.7</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mb-3">From Los Angeles, round trip</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-gray-500 line-through text-sm">$1200</p>
+                                        <p class="font-semibold text-secondary">$900</p>
+                                    </div>
+                                    <button class="text-primary font-medium">View deal</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button class="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark">
+                            Show all flight deals
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Car Rentals Tab Content -->
+        <div id="rentals" class="tab-content">
+            <section class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-2xl font-bold mb-8">Find your perfect car</h2>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pick-up location</label>
+                                <input type="text" placeholder="City or Airport"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Drop-off location</label>
+                                <input type="text" placeholder="Same as pick-up"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pick-up date</label>
+                                <input type="text" placeholder="Select date"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    id="pickupDate">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Drop-off date</label>
+                                <input type="text" placeholder="Select date"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    id="dropoffDate">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Car type</label>
+                                <select
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <option>Any</option>
+                                    <option>Economy</option>
+                                    <option>Compact</option>
+                                    <option>SUV</option>
+                                    <option>Luxury</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button
+                                class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                Search cars
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Car Rental 1 -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg smooth-transition">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Toyota Corolla" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-10%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-lg">Toyota Corolla</h3>
+                                    <div class="flex items-center bg-primary text-white px-2 py-1 rounded">
+                                        <i class="fas fa-star text-xs mr-1"></i>
+                                        <span class="text-sm">4.7</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mb-3">Economy · 5 seats · Automatic</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-gray-500 line-through text-sm">$45/day</p>
+                                        <p class="font-semibold text-secondary">$40/day</p>
+                                    </div>
+                                    <button class="text-primary font-medium">View deal</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Car Rental 2 -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg smooth-transition">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Ford Mustang" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-15%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-lg">Ford Mustang</h3>
+                                    <div class="flex items-center bg-primary text-white px-2 py-1 rounded">
+                                        <i class="fas fa-star text-xs mr-1"></i>
+                                        <span class="text-sm">4.9</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mb-3">Sports · 4 seats · Automatic</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-gray-500 line-through text-sm">$120/day</p>
+                                        <p class="font-semibold text-secondary">$102/day</p>
+                                    </div>
+                                    <button class="text-primary font-medium">View deal</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Car Rental 3 -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg smooth-transition">
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Range Rover" class="w-full h-full object-cover">
+                                <div class="absolute top-0 left-0 bg-secondary text-white px-3 py-1 font-bold">-20%
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-semibold text-lg">Range Rover</h3>
+                                    <div class="flex items-center bg-primary text-white px-2 py-1 rounded">
+                                        <i class="fas fa-star text-xs mr-1"></i>
+                                        <span class="text-sm">4.8</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mb-3">Luxury SUV · 5 seats · Automatic</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-gray-500 line-through text-sm">$200/day</p>
+                                        <p class="font-semibold text-secondary">$160/day</p>
+                                    </div>
+                                    <button class="text-primary font-medium">View deal</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button class="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark">
+                            Show all car rentals
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Experiences Tab Content -->
+        <div id="experiences" class="tab-content">
+            <section class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-2xl font-bold mb-8">Unique experiences</h2>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                <input type="text" placeholder="Where are you going?"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input type="text" placeholder="Select date"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    id="experienceDate">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                <select
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <option>All categories</option>
+                                    <option>Food & Drink</option>
+                                    <option>Outdoor</option>
+                                    <option>Cultural</option>
+                                    <option>Workshops</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+                                <select
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <option>1 guest</option>
+                                    <option>2 guests</option>
+                                    <option>3 guests</option>
+                                    <option>4 guests</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button
+                                class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                Search experiences
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Experience 1 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-lg smooth-transition cursor-pointer">
+                            <div class="h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                                    alt="Cooking Class" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg">Authentic Italian Cooking Class</h3>
+                                <p class="text-gray-500 text-sm mt-1">Rome, Italy</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <span class="ml-1 text-sm">4.98 (120 reviews)</span>
+                                </div>
+                                <p class="mt-2"><span class="font-semibold">$65</span> per person</p>
+                            </div>
+                        </div>
+
+                        <!-- Experience 2 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-lg smooth-transition cursor-pointer">
+                            <div class="h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1503917988258-f87a78e3c995?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80"
+                                    alt="Hiking" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg">Sunrise Mountain Hike</h3>
+                                <p class="text-gray-500 text-sm mt-1">Denver, Colorado</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <span class="ml-1 text-sm">4.92 (85 reviews)</span>
+                                </div>
+                                <p class="mt-2"><span class="font-semibold">$40</span> per person</p>
+                            </div>
+                        </div>
+
+                        <!-- Experience 3 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-lg smooth-transition cursor-pointer">
+                            <div class="h-48 overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80"
+                                    alt="Wine Tasting" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg">Wine Tasting Tour</h3>
+                                <p class="text-gray-500 text-sm mt-1">Napa Valley, California</p>
+                                <div class="flex items-center mt-2">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <span class="ml-1 text-sm">4.89 (210 reviews)</span>
+                                </div>
+                                <p class="mt-2"><span class="font-semibold">$95</span> per person</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button class="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark">
+                            Show all experiences
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Host Section -->
+        <section class="py-16 bg-primary text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="md:flex items-center">
+                    <div class="md:w-1/2 mb-8 md:mb-0">
+                        <h2 class="text-3xl font-bold mb-4">Become a Host</h2>
+                        <p class="text-lg mb-6">Earn extra income and unlock new opportunities by sharing your space.
+                        </p>
+                        <button class="px-6 py-3 bg-white text-primary rounded-lg font-medium hover:bg-gray-100">
+                            Learn More
+                        </button>
+                    </div>
+                    <div class="md:w-1/2">
+                        <img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2086&q=80"
+                            alt="Host" class="rounded-lg shadow-xl">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-bold mb-12 text-center">What our guests say</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Testimonial 1 -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                            <div>
+                                <h4 class="font-semibold">Sarah Johnson</h4>
+                                <div class="flex">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700">"The beachfront villa was absolutely stunning! The host was incredibly
+                            welcoming and the location was perfect. Can't wait to come back!"</p>
+                    </div>
+
+                    <!-- Testimonial 2 -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                            <div>
+                                <h4 class="font-semibold">Michael Chen</h4>
+                                <div class="flex">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700">"The cooking class in Rome was the highlight of our trip. We learned so
+                            much and the food was delicious. Highly recommend this experience!"</p>
+                    </div>
+
+                    <!-- Testimonial 3 -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                            <div>
+                                <h4 class="font-semibold">Emma Rodriguez</h4>
+                                <div class="flex">
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                    <i class="fas fa-star text-sm text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700">"The mountain cabin was cozy and had everything we needed. The views
+                            were breathtaking and the host provided great local recommendations."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter -->
+        <section class="py-16 bg-gray-100">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl font-bold mb-4">Get inspired for your next trip</h2>
+                <p class="text-gray-600 mb-8">Sign up for our newsletter and receive the best travel tips and exclusive
+                    offers.</p>
+
+                <div class="max-w-md mx-auto flex">
+                    <input type="email" placeholder="Your email address"
+                        class="py-3 px-4 w-full rounded-l-lg focus:outline-none">
+                    <button
+                        class="bg-primary text-white px-6 py-3 font-medium rounded-r-lg hover:bg-primary-dark">Subscribe</button>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-4">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Other Pages -->
+    <div id="wishlistPage" class="page-content hidden">
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-2xl font-bold mb-8">Your wishlist</h1>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Wishlist items would be loaded here -->
+                    <div class="text-center py-12">
+                        <i class="fas fa-heart text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-700">Your wishlist is empty</h3>
+                        <p class="text-gray-500 mt-1">Save properties you like to your wishlist</p>
+                        <button
+                            class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark"
+                            onclick="showPage('home')">
+                            Explore properties
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="tripsPage" class="page-content hidden">
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-2xl font-bold mb-8">Your trips</h1>
+                <div class="text-center py-12">
+                    <i class="fas fa-suitcase text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-700">No trips booked...yet!</h3>
+                    <p class="text-gray-500 mt-1">Time to dust off your bags and start planning your next adventure</p>
+                    <button class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark"
+                        onclick="showPage('home')">
+                        Start searching
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="inboxPage" class="page-content hidden">
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-2xl font-bold mb-8">Your inbox</h1>
+                <div class="text-center py-12">
+                    <i class="fas fa-envelope text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-700">No messages yet</h3>
+                    <p class="text-gray-500 mt-1">When you contact hosts or have reservations, your messages will appear
+                        here</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="profilePage" class="page-content hidden">
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/3 md:pr-8">
+                        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                            <div class="flex flex-col items-center">
+                                <div class="w-24 h-24 bg-gray-300 rounded-full mb-4"></div>
+                                <h2 class="text-xl font-bold">Your Profile</h2>
+                                <p class="text-gray-500 text-sm">Member since 2023</p>
+                            </div>
+                            <div class="mt-6 space-y-4">
+                                <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+                                    Personal info
+                                </button>
+                                <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+                                    Account security
+                                </button>
+                                <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+                                    Payments & payouts
+                                </button>
+                                <button class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+                                    Notifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="bg-white rounded-xl shadow-md p-6">
+                            <h2 class="text-xl font-bold mb-6">Personal info</h2>
+                            <form class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">First name</label>
+                                    <input type="text"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Last name</label>
+                                    <input type="text"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
+                                    <input type="tel"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date of birth</label>
+                                    <input type="date"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <button type="submit"
+                                    class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark">
+                                    Save
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Safety information</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cancellation options</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Community</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Disaster relief</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Support refugees</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Combating discrimination</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Hosting</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Try hosting</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">AirCover for Hosts</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Hosting resources</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Soon</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Newsroom</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Investors</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400">© 2023 Soon, Inc. All rights reserved</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg flex justify-around py-3 z-50">
+        <a href="#" class="text-primary flex flex-col items-center" onclick="showPage('home')">
+            <i class="fas fa-search"></i>
+            <span class="text-xs mt-1">Explore</span>
+        </a>
+        <a href="#" class="text-gray-500 flex flex-col items-center" onclick="showPage('wishlist')">
+            <i class="far fa-heart"></i>
+            <span class="text-xs mt-1">Wishlist</span>
+        </a>
+        <a href="#" class="text-gray-500 flex flex-col items-center" onclick="showPage('trips')">
+            <i class="fas fa-globe"></i>
+            <span class="text-xs mt-1">Trips</span>
+        </a>
+        <a href="#" class="text-gray-500 flex flex-col items-center" onclick="showPage('inbox')">
+            <i class="fas fa-inbox"></i>
+            <span class="text-xs mt-1">Inbox</span>
+        </a>
+        <a href="#" class="text-gray-500 flex flex-col items-center" onclick="showPage('profile')">
+            <i class="fas fa-user"></i>
+            <span class="text-xs mt-1">Profile</span>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker.min.js"></script>
+    <script>
+        // Current page state
+        let currentPage = 'home';
+        let currentTab = 'stays';
+
+        // Toggle login modal
+        function toggleLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Toggle property detail modal
+        function togglePropertyModal() {
+            const modal = document.getElementById('propertyModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Toggle mobile filters
+        function toggleMobileFilters() {
+            const panel = document.getElementById('mobileFilterPanel');
+            panel.classList.toggle('open');
+        }
+
+        // Show property detail with specific data
+        function showPropertyDetail(title, price, rating, reviews) {
+            document.getElementById('propertyTitle').textContent = title;
+            document.querySelector('#propertyModal .text-xl.font-bold').textContent = `$${price}`;
+            document.querySelector('#propertyModal .flex.items-center .text-sm').innerHTML = `<i class="fas fa-star text-primary mr-1"></i> ${rating} · ${reviews} reviews`;
+            togglePropertyModal();
+        }
+
+        // Change main image in property modal
+        function changeMainImage(src) {
+            document.getElementById('propertyMainImage').src = src;
+        }
+
+        // Show a specific page
+        function showPage(page) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            // Show selected page
+            document.getElementById(`${page}Page`).classList.remove('hidden');
+
+            // Update current page
+            currentPage = page;
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Show a specific tab
+        function showTab(tab) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tab).classList.add('active');
+
+            // Update active tab styling
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Find the clicked tab and make it active
+            const tabs = document.querySelectorAll('.nav-tab');
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].textContent.trim().toLowerCase() === tab) {
+                    tabs[i].classList.add('active');
+                    break;
+                }
+            }
+
+            // Update current tab
+            currentTab = tab;
+        }
+
+        // Initialize date pickers
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hero date picker
+            const heroCheckin = document.getElementById('heroCheckin');
+            const heroDatepicker = new Datepicker(heroCheckin, {
+                autohide: true,
+                format: 'M d, yyyy',
+                todayHighlight: true,
+                nextArrow: '<i class="fas fa-chevron-right"></i>',
+                prevArrow: '<i class="fas fa-chevron-left"></i>'
+            });
+
+            // Property detail date pickers
+            const checkinDetail = document.getElementById('checkinDetail');
+            const checkoutDetail = document.getElementById('checkoutDetail');
+
+            const checkinPicker = new Datepicker(checkinDetail, {
+                autohide: true,
+                format: 'M d, yyyy',
+                todayHighlight: true,
+                nextArrow: '<i class="fas fa-chevron-right"></i>',
+                prevArrow: '<i class="fas fa-chevron-left"></i>'
+            });
+
+            const checkoutPicker = new Datepicker(checkoutDetail, {
+                autohide: true,
+                format: 'M d, yyyy',
+                todayHighlight: true,
+                nextArrow: '<i class="fas fa-chevron-right"></i>',
+                prevArrow: '<i class="fas fa-chevron-left"></i>'
+            });
+
+        });
+
+
+
+    </script>
