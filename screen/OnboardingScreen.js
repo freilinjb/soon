@@ -9,21 +9,22 @@ const onboardingSlides = [
     id: '1',
     title: 'Encuentra lugares únicos',
     description: 'Descubre alojamientos especiales que no encontrarás en ningún otro lugar.',
-    image: require('../assets/onboarding1.png'), // Reemplaza con tus imágenes
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80', // Reemplaza con tus imágenes
+    // image: require('../assets/onboarding1.png'), // Reemplaza con tus imágenes
     color: '#FFFFFF'
   },
   {
     id: '2',
     title: 'Reserva con confianza',
     description: 'Con nuestro sistema de reservas seguro y fácil de usar.',
-    image: require('../assets/onboarding2.png'), // Reemplaza con tus imágenes
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80', // Reemplaza con tus imágenes
     color: '#FFFFFF'
   },
   {
     id: '3',
     title: 'Viaja como local',
     description: 'Vive experiencias auténticas en tus destinos favoritos.',
-    image: require('../assets/onboarding3.png'), // Reemplaza con tus imágenes
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80', // Reemplaza con tus imágenes
     color: '#FFFFFF'
   }
 ];
@@ -43,12 +44,14 @@ const OnboardingScreen = ({ navigation }) => {
     if (currentIndex < onboardingSlides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      navigation.navigate('Auth');
+      navigation.replace('Home');
+    //   navigation.navigate('Auth');
     }
   };
 
   const skipOnboarding = () => {
-    navigation.navigate('Auth');
+      navigation.replace('Home');
+    // navigation.navigate('Auth');
   };
 
   return (
