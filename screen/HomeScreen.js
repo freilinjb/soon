@@ -4,6 +4,7 @@ import { FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@e
 import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   FlatList,
@@ -13,6 +14,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -28,6 +30,9 @@ const HomeScreen = () => {
   const [activeTab, setActiveTab] = useState('stays');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showFiltersModal, setShowFiltersModal] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeFilters, setActiveFilters] = useState({});
   const scrollY = useRef(new Animated.Value(0)).current;
 
   // Animated header styles
@@ -45,7 +50,7 @@ const HomeScreen = () => {
 
   const heroOpacity = scrollY.interpolate({
     inputRange: [0, HERO_HEIGHT - HEADER_HEIGHT],
-    outputRange: [1, 0.3],
+    outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
@@ -59,57 +64,85 @@ const HomeScreen = () => {
     { id: '6', name: 'Campo', icon: 'tree', color: '#81B29A' },
     { id: '7', name: 'Vistas', icon: 'binoculars', color: '#F4A261' },
     { id: '8', name: 'Ciudad', icon: 'city', color: '#9B59B6' },
+    { id: '9', name: 'Golf', icon: 'golf-ball', color: '#5D9C59' },
+    { id: '10', name: 'Romántico', icon: 'heart', color: '#E84393' },
   ];
 
   const savedProperties = [
     {
       id: '1',
-      title: 'Villa frente al mar en Punta Cana',
+      title: 'Villa frente al mar en Punta Cana con piscina privada',
       location: 'Punta Cana',
-      price: 250,
+      price: 350,
       rating: 4.92,
       reviews: 128,
       image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       savedDaysAgo: 3,
       isSuperhost: true,
+      bedrooms: 3,
+      bathrooms: 2,
+      amenities: ['wifi', 'pool', 'ac', 'parking'],
     },
     {
       id: '2',
-      title: 'Retiro en las montañas de Jarabacoa',
+      title: 'Retiro en las montañas de Jarabacoa con chimenea',
       location: 'Jarabacoa',
       price: 180,
       rating: 4.85,
       reviews: 92,
       image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       savedDaysAgo: 1,
+      bedrooms: 2,
+      bathrooms: 1,
+      amenities: ['wifi', 'kitchen', 'fireplace'],
+    },
+    {
+      id: '3',
+      title: 'Apartamento moderno en Zona Colonial con vista al malecón',
+      location: 'Santo Domingo',
+      price: 120,
+      rating: 4.78,
+      reviews: 65,
+      image: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      savedDaysAgo: 5,
+      isSuperhost: true,
+      bedrooms: 1,
+      bathrooms: 1,
+      amenities: ['wifi', 'ac', 'washer'],
     },
   ];
 
   const properties = [
     {
       id: '1',
-      title: 'Penthouse en Santo Domingo con vista al mar',
+      title: 'Penthouse en Santo Domingo con vista al mar y terraza privada',
       location: 'Santo Domingo',
-      price: 150,
+      price: 250,
       rating: 4.88,
       reviews: 76,
       image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       dates: 'Jun 15-20',
       isSuperhost: true,
+      bedrooms: 2,
+      bathrooms: 2,
+      amenities: ['wifi', 'ac', 'parking', 'elevator'],
     },
     {
       id: '2',
-      title: 'Casa en la playa - Las Terrenas',
+      title: 'Casa en la playa - Las Terrenas con acceso directo a la arena',
       location: 'Las Terrenas',
-      price: 220,
+      price: 320,
       rating: 4.95,
       reviews: 145,
       image: 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       dates: 'Jul 5-10',
+      bedrooms: 3,
+      bathrooms: 2,
+      amenities: ['wifi', 'pool', 'kitchen', 'beachfront'],
     },
     {
       id: '3',
-      title: 'Loft colonial en Zona Colonial',
+      title: 'Loft colonial en Zona Colonial con encanto histórico',
       location: 'Zona Colonial',
       price: 120,
       rating: 4.78,
@@ -117,23 +150,56 @@ const HomeScreen = () => {
       image: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       dates: 'Aug 15-20',
       isSuperhost: true,
+      bedrooms: 1,
+      bathrooms: 1,
+      amenities: ['wifi', 'historic', 'central'],
     },
     {
       id: '4',
-      title: 'Eco Lodge en Samaná con acceso privado a playa',
+      title: 'Eco Lodge en Samaná con acceso privado a playa y cascada',
       location: 'Samaná',
       price: 95,
       rating: 4.82,
       reviews: 53,
       image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80',
       dates: 'Sep 3-10',
+      bedrooms: 1,
+      bathrooms: 1,
+      amenities: ['eco', 'nature', 'waterfall'],
+    },
+    {
+      id: '5',
+      title: 'Cabaña de lujo en Constanza con vista a las montañas',
+      location: 'Constanza',
+      price: 175,
+      rating: 4.89,
+      reviews: 42,
+      image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
+      dates: 'Oct 12-18',
+      isSuperhost: true,
+      bedrooms: 2,
+      bathrooms: 1,
+      amenities: ['mountain', 'fireplace', 'nature'],
+    },
+    {
+      id: '6',
+      title: 'Departamento ejecutivo en Piantini con gimnasio',
+      location: 'Santo Domingo',
+      price: 210,
+      rating: 4.75,
+      reviews: 38,
+      image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      dates: 'Nov 5-10',
+      bedrooms: 2,
+      bathrooms: 2,
+      amenities: ['wifi', 'gym', 'pool', 'ac'],
     },
   ];
 
   const deals = [
     {
       id: '1',
-      title: 'Villa con piscina en Cabarete',
+      title: 'Villa con piscina en Cabarete cerca de la playa',
       location: 'Cabarete',
       price: 350,
       discount: 25,
@@ -144,10 +210,13 @@ const HomeScreen = () => {
       dates: 'Jun 10-15',
       lastBooked: 'Hace 2 horas',
       isSuperhost: true,
+      bedrooms: 3,
+      bathrooms: 2,
+      amenities: ['wifi', 'pool', 'beach', 'kitchen'],
     },
     {
       id: '2',
-      title: 'Penthouse en Puerto Plata con vista al océano',
+      title: 'Penthouse en Puerto Plata con vista al océano y jacuzzi',
       location: 'Puerto Plata',
       price: 280,
       discount: 15,
@@ -157,10 +226,13 @@ const HomeScreen = () => {
       image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       dates: 'Jul 5-10',
       lastBooked: 'Solo 1 disponible',
+      bedrooms: 2,
+      bathrooms: 2,
+      amenities: ['wifi', 'jacuzzi', 'view', 'ac'],
     },
     {
       id: '3',
-      title: 'Bungalow en Bayahibe frente al mar',
+      title: 'Bungalow en Bayahibe frente al mar con snorkel incluido',
       location: 'Bayahibe',
       price: 200,
       discount: 20,
@@ -171,49 +243,107 @@ const HomeScreen = () => {
       dates: 'Aug 12-18',
       lastBooked: 'Oferta popular',
       isSuperhost: true,
+      bedrooms: 1,
+      bathrooms: 1,
+      amenities: ['beachfront', 'snorkeling', 'breakfast'],
+    },
+    {
+      id: '4',
+      title: 'Casa de campo en Bonao con río privado',
+      location: 'Bonao',
+      price: 150,
+      discount: 30,
+      discountedPrice: 105,
+      rating: 4.79,
+      reviews: 34,
+      image: 'https://images.unsplash.com/photo-1600566752227-8f3bdc9e379d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      dates: 'Sep 5-12',
+      lastBooked: 'Reserva rápida',
+      bedrooms: 2,
+      bathrooms: 1,
+      amenities: ['river', 'nature', 'hiking'],
     },
   ];
 
   const experiences = [
     {
       id: '1',
-      title: 'Clase de cocina dominicana con chef local',
+      title: 'Clase de cocina dominicana con chef local en mercado tradicional',
       location: 'Santo Domingo',
       price: 65,
       rating: 4.98,
       reviews: 120,
       image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
       type: 'Experiencia culinaria',
+      duration: '3 horas',
+      groupSize: 'Hasta 8 personas',
+      languages: ['Español', 'Inglés'],
     },
     {
       id: '2',
-      title: 'Excursión a la cascada El Limón',
+      title: 'Excursión a la cascada El Limón con baño incluido',
       location: 'Samaná',
       price: 40,
       rating: 4.92,
       reviews: 85,
       image: 'https://images.unsplash.com/photo-1503917988258-f87a78e3c995?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80',
       type: 'Aventura',
+      duration: '5 horas',
+      groupSize: 'Hasta 12 personas',
+      languages: ['Español'],
     },
     {
       id: '3',
-      title: 'Tour de ron dominicano con degustación',
+      title: 'Tour de ron dominicano con degustación premium',
       location: 'Punta Cana',
       price: 55,
       rating: 4.89,
       reviews: 210,
       image: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80',
       type: 'Degustación',
+      duration: '2 horas',
+      groupSize: 'Hasta 10 personas',
+      languages: ['Español', 'Inglés', 'Francés'],
     },
     {
       id: '4',
-      title: 'Tour de café en las montañas de Jarabacoa',
+      title: 'Tour de café en las montañas de Jarabacoa con productores locales',
       location: 'Jarabacoa',
       price: 35,
       rating: 4.87,
       reviews: 95,
       image: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2061&q=80',
       type: 'Cultural',
+      duration: '4 horas',
+      groupSize: 'Hasta 6 personas',
+      languages: ['Español'],
+    },
+    {
+      id: '5',
+      title: 'Avistamiento de ballenas en Samaná con biólogo marino',
+      location: 'Samaná',
+      price: 75,
+      rating: 4.95,
+      reviews: 156,
+      image: 'https://images.unsplash.com/photo-1560275619-4662e36fa65c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2089&q=80',
+      type: 'Naturaleza',
+      duration: '6 horas',
+      groupSize: 'Hasta 15 personas',
+      languages: ['Español', 'Inglés'],
+      seasonal: 'Enero-Marzo',
+    },
+    {
+      id: '6',
+      title: 'Clase de merengue y bachata con bailarines profesionales',
+      location: 'Santo Domingo',
+      price: 45,
+      rating: 4.91,
+      reviews: 78,
+      image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      type: 'Baile',
+      duration: '2 horas',
+      groupSize: 'Hasta 8 personas',
+      languages: ['Español', 'Inglés'],
     },
   ];
 
@@ -223,31 +353,85 @@ const HomeScreen = () => {
       name: 'María García',
       location: 'Santiago',
       rating: 5,
-      text: "La villa en Punta Cana fue increíble. El anfitrión fue muy atento y la ubicación perfecta. ¡Volveremos seguro!",
+      text: "La villa en Punta Cana fue increíble. El anfitrión fue muy atento y la ubicación perfecta a solo pasos de la playa. La piscina privada era el toque perfecto para relajarnos después de un día de explorar. ¡Volveremos seguro!",
       avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      stay: 'Villa Punta Cana',
+      date: 'Marzo 2023',
     },
     {
       id: '2',
       name: 'Juan Pérez',
       location: 'Santo Domingo',
       rating: 5,
-      text: "La clase de cocina fue lo mejor de nuestro viaje. Aprendimos mucho sobre la gastronomía dominicana y la comida estaba deliciosa.",
+      text: "La clase de cocina fue lo mejor de nuestro viaje. Aprendimos mucho sobre la gastronomía dominicana y la comida estaba deliciosa. El chef nos llevó al mercado local primero, lo que hizo la experiencia aún más auténtica.",
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      stay: 'Clase de cocina',
+      date: 'Enero 2023',
     },
     {
       id: '3',
       name: 'Sophie Martin',
       location: 'París, Francia',
       rating: 5,
-      text: "El retiro en Jarabacoa era acogedor y tenía todo lo necesario. Las vistas eran impresionantes y el anfitrión nos dio excelentes recomendaciones.",
+      text: "El retiro en Jarabacoa era acogedor y tenía todo lo necesario. Las vistas eran impresionantes y el anfitrión nos dio excelentes recomendaciones para excursiones. La chimenea hizo las noches frías de montaña muy especiales.",
       avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
+      stay: 'Cabaña Jarabacoa',
+      date: 'Diciembre 2022',
+    },
+    {
+      id: '4',
+      name: 'Carlos Rodríguez',
+      location: 'Madrid, España',
+      rating: 4,
+      text: "El tour de avistamiento de ballenas fue una experiencia única. Vimos varias ballenas muy cerca y el guía era muy conocedor. El único punto negativo fue que el barco estaba un poco lleno.",
+      avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
+      stay: 'Tour de ballenas',
+      date: 'Febrero 2023',
     },
   ];
+
+  const popularDestinations = [
+    {
+      id: '1',
+      name: 'Punta Cana',
+      image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1932&q=80',
+      properties: 1245,
+    },
+    {
+      id: '2',
+      name: 'Santo Domingo',
+      image: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      properties: 876,
+    },
+    {
+      id: '3',
+      name: 'Las Terrenas',
+      image: 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      properties: 543,
+    },
+    {
+      id: '4',
+      name: 'Jarabacoa',
+      image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      properties: 321,
+    },
+  ];
+
+  const applyFilters = (filters) => {
+    setIsLoading(true);
+    setActiveFilters(filters);
+    
+    // Simulamos una carga de 1.5 segundos
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  };
 
   const renderCategoryItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.categoryItem}
       activeOpacity={0.8}
+      onPress={() => navigation.navigate('Category', { category: item })}
     >
       <View style={[styles.categoryIcon, { backgroundColor: item.color }]}>
         <FontAwesome name={item.icon} size={20} color="white" />
@@ -286,6 +470,10 @@ const HomeScreen = () => {
         <Text style={styles.propertyPrice}>
           <Text style={styles.propertyPriceBold}>${item.price}</Text> noche
         </Text>
+        <View style={styles.propertyFeatures}>
+          <Text style={styles.propertyFeature}>{item.bedrooms} hab.</Text>
+          <Text style={styles.propertyFeature}>{item.bathrooms} baño{item.bathrooms > 1 ? 's' : ''}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -320,6 +508,10 @@ const HomeScreen = () => {
         <Text style={styles.propertyPrice}>
           <Text style={styles.propertyPriceBold}>${item.price}</Text> noche
         </Text>
+        <View style={styles.propertyFeatures}>
+          <Text style={styles.propertyFeature}>{item.bedrooms} hab.</Text>
+          <Text style={styles.propertyFeature}>{item.bathrooms} baño{item.bathrooms > 1 ? 's' : ''}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -355,6 +547,10 @@ const HomeScreen = () => {
         <Text style={styles.dealDates}>
           {item.dates} · {item.lastBooked}
         </Text>
+        <View style={styles.propertyFeatures}>
+          <Text style={styles.propertyFeature}>{item.bedrooms} hab.</Text>
+          <Text style={styles.propertyFeature}>{item.bathrooms} baño{item.bathrooms > 1 ? 's' : ''}</Text>
+        </View>
       </View>
     </View>
   );
@@ -363,6 +559,7 @@ const HomeScreen = () => {
     <TouchableOpacity 
       style={styles.experienceCard}
       activeOpacity={0.8}
+      onPress={() => navigation.navigate('ExperienceDetail', { experience: item })}
     >
       <Image source={{ uri: item.image }} style={styles.experienceImage} />
       <View style={styles.experienceInfo}>
@@ -378,6 +575,10 @@ const HomeScreen = () => {
         <Text style={styles.experiencePrice}>
           <Text style={styles.propertyPriceBold}>${item.price}</Text> por persona
         </Text>
+        <View style={styles.experienceDetails}>
+          <Text style={styles.experienceDetail}>{item.duration}</Text>
+          <Text style={styles.experienceDetail}>{item.groupSize}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -386,7 +587,7 @@ const HomeScreen = () => {
     <View style={styles.testimonialCard}>
       <View style={styles.testimonialHeader}>
         <Image source={{ uri: item.avatar }} style={styles.testimonialAvatar} />
-        <View>
+        <View style={styles.testimonialUserInfo}>
           <Text style={styles.testimonialName}>{item.name}</Text>
           <Text style={styles.testimonialLocation}>{item.location}</Text>
           <View style={styles.testimonialStars}>
@@ -396,8 +597,20 @@ const HomeScreen = () => {
           </View>
         </View>
       </View>
+      <Text style={styles.testimonialStay}>{item.stay} · {item.date}</Text>
       <Text style={styles.testimonialText}>{item.text}</Text>
     </View>
+  );
+
+  const renderDestinationCard = ({ item }) => (
+    <TouchableOpacity style={styles.destinationCard}>
+      <Image source={{ uri: item.image }} style={styles.destinationImage} />
+      <View style={styles.destinationOverlay} />
+      <View style={styles.destinationContent}>
+        <Text style={styles.destinationName}>{item.name}</Text>
+        <Text style={styles.destinationProperties}>{item.properties} propiedades</Text>
+      </View>
+    </TouchableOpacity>
   );
 
   const renderTabContent = () => {
@@ -428,6 +641,20 @@ const HomeScreen = () => {
               />
             </View>
 
+            {/* Popular Destinations */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Destinos populares</Text>
+              <Text style={styles.sectionSubtitle}>Lugares que los viajeros aman</Text>
+              <FlatList
+                data={popularDestinations}
+                renderItem={renderDestinationCard}
+                keyExtractor={item => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.destinationsList}
+              />
+            </View>
+
             {/* All Properties */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
@@ -443,14 +670,21 @@ const HomeScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <FlatList
-                data={properties}
-                renderItem={renderPropertyCard}
-                keyExtractor={item => item.id}
-                numColumns={2}
-                columnWrapperStyle={styles.propertiesGrid}
-                scrollEnabled={false}
-              />
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={theme.colors.primary} />
+                  <Text style={styles.loadingText}>Aplicando filtros...</Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={properties}
+                  renderItem={renderPropertyCard}
+                  keyExtractor={item => item.id}
+                  numColumns={2}
+                  columnWrapperStyle={styles.propertiesGrid}
+                  scrollEnabled={false}
+                />
+              )}
               <TouchableOpacity style={styles.showAllButton}>
                 <Text style={styles.showAllButtonText}>Mostrar todo (200+)</Text>
               </TouchableOpacity>
@@ -467,6 +701,20 @@ const HomeScreen = () => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.dealsList}
+              />
+            </View>
+
+            {/* Testimonials */}
+            <View style={styles.testimonialsContainer}>
+              <Text style={styles.testimonialsTitle}>Lo que dicen nuestros huéspedes</Text>
+              <Text style={styles.testimonialsSubtitle}>Experiencias reales de viajeros</Text>
+              <FlatList
+                data={testimonials}
+                renderItem={renderTestimonialCard}
+                keyExtractor={item => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.testimonialsList}
               />
             </View>
           </View>
@@ -488,6 +736,20 @@ const HomeScreen = () => {
               <TouchableOpacity style={styles.showAllButton}>
                 <Text style={styles.showAllButtonText}>Mostrar todas las experiencias</Text>
               </TouchableOpacity>
+            </View>
+
+            {/* Testimonials */}
+            <View style={styles.testimonialsContainer}>
+              <Text style={styles.testimonialsTitle}>Lo que dicen nuestros viajeros</Text>
+              <Text style={styles.testimonialsSubtitle}>Experiencias reales de participantes</Text>
+              <FlatList
+                data={testimonials.filter(t => t.stay.includes('Tour') || t.stay.includes('Clase'))}
+                renderItem={renderTestimonialCard}
+                keyExtractor={item => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.testimonialsList}
+              />
             </View>
           </View>
         );
@@ -513,16 +775,36 @@ const HomeScreen = () => {
           backgroundColor: theme.colors.white,
         }
       ]}>
-        <TouchableOpacity style={styles.headerButton}
-          onPress={() => setShowFiltersModal(true)}
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={() => {
+            console.log('search...');
+            setShowFiltersModal(true);
+          }}
         >
           <Ionicons name="search" size={20} color={theme.colors.gray900} />
         </TouchableOpacity>
+        
+        <View style={styles.headerSearchContainer}>
+          <TextInput
+            style={styles.headerSearchInput}
+            placeholder="¿A dónde vas?"
+            placeholderTextColor={theme.colors.gray500}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+        
         <TouchableOpacity 
           style={styles.headerButton}
           onPress={() => setShowFiltersModal(true)}
         >
           <MaterialIcons name="tune" size={20} color={theme.colors.gray900} />
+          {Object.keys(activeFilters).length > 0 && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{Object.keys(activeFilters).length}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </Animated.View>
 
@@ -539,6 +821,7 @@ const HomeScreen = () => {
           <TouchableOpacity 
             style={styles.searchButton}
             activeOpacity={0.9}
+            onPress={() => setShowFiltersModal(true)}
           >
             <View style={styles.searchButtonContent}>
               <Ionicons name="search" size={20} color={theme.colors.gray700} />
@@ -626,6 +909,27 @@ const HomeScreen = () => {
           />
         </View>
 
+        {/* Newsletter */}
+        <View style={styles.newsletterContainer}>
+          <Text style={styles.newsletterTitle}>Recibe ofertas exclusivas</Text>
+          <Text style={styles.newsletterSubtitle}>
+            Suscríbete a nuestro boletín y recibe descuentos especiales, recomendaciones de viaje y más.
+          </Text>
+          <View style={styles.newsletterForm}>
+            <TextInput
+              style={styles.newsletterInput}
+              placeholder="Tu correo electrónico"
+              placeholderTextColor={theme.colors.gray500}
+              keyboardType="email-address"
+            />
+            <TouchableOpacity style={styles.newsletterButton}>
+              <Text style={styles.newsletterButtonText}>Suscribirse</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.newsletterFooter}>
+            Puedes darte de baja en cualquier momento. Lee nuestra Política de Privacidad.
+          </Text>
+        </View>
       </ScrollView>
 
       {/* Login Modal */}
@@ -637,7 +941,8 @@ const HomeScreen = () => {
       {/* Filters Modal */}
       <FiltersModal 
         visible={showFiltersModal} 
-        onClose={() => setShowFiltersModal(false)} 
+        onClose={() => setShowFiltersModal(false)}
+        onApplyFilters={applyFilters}
       />
     </SafeAreaView>
   );
@@ -658,7 +963,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 40 : 20,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
@@ -675,6 +980,36 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    position: 'relative',
+  },
+  headerSearchContainer: {
+    flex: 1,
+    marginHorizontal: 12,
+  },
+  headerSearchInput: {
+    height: 44,
+    backgroundColor: '#F7F7F7',
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    fontFamily: 'Inter-Medium',
+    color: '#333333',
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FF385C',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterBadgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontFamily: 'Inter-Bold',
   },
   heroContainer: {
     position: 'absolute',
@@ -989,6 +1324,16 @@ const styles = StyleSheet.create({
   propertyPriceBold: {
     fontFamily: 'Inter-Bold',
   },
+  propertyFeatures: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  propertyFeature: {
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
+    color: '#666666',
+    marginRight: 12,
+  },
   dealCard: {
     width: width - 80,
     borderRadius: 16,
@@ -1145,6 +1490,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: '#333333',
   },
+  experienceDetails: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  experienceDetail: {
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
+    color: '#666666',
+    marginRight: 12,
+  },
   comingSoonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -1249,6 +1604,9 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     marginRight: 16,
   },
+  testimonialUserInfo: {
+    flex: 1,
+  },
   testimonialName: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
@@ -1263,11 +1621,64 @@ const styles = StyleSheet.create({
   testimonialStars: {
     flexDirection: 'row',
   },
+  testimonialStay: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#333333',
+    marginBottom: 8,
+  },
   testimonialText: {
     fontSize: 15,
     fontFamily: 'Inter-Regular',
     color: '#666666',
     lineHeight: 22,
+  },
+  destinationsList: {
+    paddingRight: 24,
+  },
+  destinationCard: {
+    width: 200,
+    height: 120,
+    borderRadius: 12,
+    marginRight: 16,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  destinationImage: {
+    width: '100%',
+    height: '100%',
+  },
+  destinationOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  destinationContent: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    right: 12,
+  },
+  destinationName: {
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    color: 'white',
+    marginBottom: 4,
+  },
+  destinationProperties: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: 'white',
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#666666',
+    marginTop: 16,
   },
   newsletterContainer: {
     padding: 24,

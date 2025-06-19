@@ -1,6 +1,7 @@
 import FiltersModal from "@/components/FiltersModal";
 import LoginModal from "@/components/LoginModal";
 import { ThemeProvider } from "@/context/ThemeContext";
+import BookingScreen from "@/screen/BookingScreen";
 import ChatScreen from "@/screen/ChatScreen";
 import HomeScreen from "@/screen/HomeScreen";
 import InboxScreen from "@/screen/InboxScreen";
@@ -119,6 +120,20 @@ export default function App() {
           <Stack.Screen
             name="Chat"
             component={ChatScreen}
+            options={{
+              title: "Chat",
+              headerStyle: {
+                backgroundColor: "#fff",
+                elevation: 0,
+                shadowOpacity: 0,
+              },
+              headerTintColor: "#2EC0CE",
+            }}
+          />
+
+          <Stack.Screen
+            name="Reservacion"
+            component={BookingScreen}
             options={{
               title: "Chat",
               headerStyle: {

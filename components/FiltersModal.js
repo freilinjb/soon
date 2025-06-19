@@ -5,9 +5,9 @@ import { useContext, useState } from 'react';
 import { Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
 
-const FiltersModal = ({ visible, onClose }) => {
+const FiltersModal = ({ visible, onClose, onApplyFilters }) => {
   const theme = useContext(ThemeContext);
-  const [priceRange, setPriceRange] = useState(500);
+  const [priceRange, setPriceRange] = useState([0, 500]);
   const [selectedBedrooms, setSelectedBedrooms] = useState(null);
   const [selectedBeds, setSelectedBeds] = useState(null);
   const [selectedBathrooms, setSelectedBathrooms] = useState(null);
@@ -22,8 +22,16 @@ const FiltersModal = ({ visible, onClose }) => {
     ac: false,
     parking: false,
     pool: false,
-    petFriendly: false
+    petFriendly: false,
+    beachfront: false,
+    gym: false,
+    fireplace: false,
+    breakfast: false,
+    elevator: false,
   });
+  const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const [guests, setGuests] = useState(1);
+  const [selectedInstantBook, setSelectedInstantBook] = useState(false);
 
   if (!visible) return null;
 
@@ -35,7 +43,7 @@ const FiltersModal = ({ visible, onClose }) => {
   };
 
   const handleClearAll = () => {
-    setPriceRange(500);
+    setPriceRange([0, 500]);
     setSelectedBedrooms(null);
     setSelectedBeds(null);
     setSelectedBathrooms(null);
@@ -49,8 +57,16 @@ const FiltersModal = ({ visible, onClose }) => {
       ac: false,
       parking: false,
       pool: false,
-      petFriendly: false
+      petFriendly: false,
+      beachfront: false,
+      gym: false,
+      fireplace: false,
+      breakfast: false,
+      elevator: false,
     });
+    setSelectedRoomType(null);
+    setGuests(1);
+    setSelectedInstantBook(false);
   };
 
   const handleApplyFilters = () => {
@@ -62,22 +78,14 @@ const FiltersModal = ({ visible, onClose }) => {
       propertyType: selectedPropertyType,
       checkIn: checkInDate.toISOString().split('T')[0],
       checkOut: checkOutDate.toISOString().split('T')[0],
-      amenities
+      amenities,
+      roomType: selectedRoomType,
+      guests,
+      instantBook: selectedInstantBook,
     };
     
-    // Simulación de búsqueda con los filtros
-    simulateSearch(filters);
+    onApplyFilters(filters);
     onClose();
-  };
-
-  const simulateSearch = (filters) => {
-    console.log('Buscando propiedades con filtros:', filters);
-    // Aquí iría la lógica real de búsqueda
-    // Por ahora simulamos una búsqueda con un timeout
-    setTimeout(() => {
-      console.log('Búsqueda completada con resultados simulados');
-      // Aquí podrías actualizar el estado de la aplicación con los resultados
-    }, 1500);
   };
 
   const formatDate = (date) => {
@@ -173,6 +181,52 @@ const FiltersModal = ({ visible, onClose }) => {
     </TouchableOpacity>
   );
 
+  const renderRoomTypeButton = (type, label) => (
+    <TouchableOpacity 
+      style={[
+        styles.roomTypeButton, 
+        { 
+          borderColor: selectedRoomType === type ? theme.colors.primary : theme.colors.gray300,
+          backgroundColor: selectedRoomType === type ? theme.colors.lightPrimary : 'transparent'
+        }
+      ]}
+      activeOpacity={0.7}
+      onPress={() => setSelectedRoomType(type)}
+    >
+      <Text style={[
+        styles.roomTypeText, 
+        { 
+          color: selectedRoomType === type ? theme.colors.primary : theme.colors.gray900 
+        }
+      ]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const renderGuestsControl = () => (
+    <View style={styles.guestsControl}>
+      <TouchableOpacity 
+        style={styles.guestButton}
+        onPress={() => setGuests(prev => Math.max(1, prev - 1))}
+        disabled={guests <= 1}
+      >
+        <Ionicons 
+          name="remove" 
+          size={20} 
+          color={guests <= 1 ? theme.colors.gray400 : theme.colors.primary} 
+        />
+      </TouchableOpacity>
+      <Text style={styles.guestCount}>{guests}</Text>
+      <TouchableOpacity 
+        style={styles.guestButton}
+        onPress={() => setGuests(prev => prev + 1)}
+      >
+        <Ionicons name="add" size={20} color={theme.colors.primary} />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <Modal
       transparent
@@ -226,6 +280,15 @@ const FiltersModal = ({ visible, onClose }) => {
               </View>
             </View>
 
+            {/* Guests */}
+            <View style={styles.filterSection}>
+              <Text style={[styles.filterTitle, { color: theme.colors.gray900 }]}>Huéspedes</Text>
+              <View style={styles.guestsRow}>
+                <Text style={[styles.guestsLabel, { color: theme.colors.gray700 }]}>Número de huéspedes</Text>
+                {renderGuestsControl()}
+              </View>
+            </View>
+
             {/* Price Range */}
             <View style={styles.filterSection}>
               <Text style={[styles.filterTitle, { color: theme.colors.gray900 }]}>Rango de precios</Text>
@@ -238,15 +301,44 @@ const FiltersModal = ({ visible, onClose }) => {
                 minimumValue={0}
                 maximumValue={2000}
                 step={50}
-                value={priceRange}
-                onValueChange={setPriceRange}
+                value={priceRange[1]}
+                onValueChange={(value) => setPriceRange([priceRange[0], value])}
                 minimumTrackTintColor={theme.colors.primary}
                 maximumTrackTintColor={theme.colors.gray200}
                 thumbTintColor={Platform.OS === 'android' ? theme.colors.primary : undefined}
               />
               <Text style={[styles.priceRangeValue, { color: theme.colors.gray900 }]}>
-                $0 - ${priceRange}
+                ${priceRange[0]} - ${priceRange[1]}
               </Text>
+            </View>
+
+            {/* Room Type */}
+            <View style={styles.filterSection}>
+              <Text style={[styles.filterTitle, { color: theme.colors.gray900 }]}>Tipo de alojamiento</Text>
+              <View style={styles.roomTypeRow}>
+                {renderRoomTypeButton('entire', 'Lugar entero')}
+                {renderRoomTypeButton('private', 'Habitación privada')}
+                {renderRoomTypeButton('shared', 'Habitación compartida')}
+              </View>
+            </View>
+
+            {/* Instant Book */}
+            <View style={styles.filterSection}>
+              <Text style={[styles.filterTitle, { color: theme.colors.gray900 }]}>Reserva instantánea</Text>
+              <TouchableOpacity 
+                style={styles.instantBookOption}
+                activeOpacity={0.7}
+                onPress={() => setSelectedInstantBook(!selectedInstantBook)}
+              >
+                <View style={styles.checkbox}>
+                  {selectedInstantBook ? (
+                    <FontAwesome name="check-square" size={20} color={theme.colors.primary} />
+                  ) : (
+                    <FontAwesome name="square-o" size={20} color={theme.colors.gray400} />
+                  )}
+                </View>
+                <Text style={[styles.amenityText, { color: theme.colors.gray900 }]}>Mostrar solo lugares que se pueden reservar al instante</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Property Type */}
@@ -326,6 +418,11 @@ const FiltersModal = ({ visible, onClose }) => {
                 {renderAmenityOption('car', 'Estacionamiento', 'parking')}
                 {renderAmenityOption('tint', 'Piscina', 'pool')}
                 {renderAmenityOption('paw', 'Mascotas permitidas', 'petFriendly')}
+                {renderAmenityOption('umbrella', 'Frente a la playa', 'beachfront')}
+                {renderAmenityOption('dumbbell', 'Gimnasio', 'gym')}
+                {renderAmenityOption('fire', 'Chimenea', 'fireplace')}
+                {renderAmenityOption('coffee', 'Desayuno incluido', 'breakfast')}
+                {renderAmenityOption('building', 'Ascensor', 'elevator')}
               </View>
             </View>
           </ScrollView>
@@ -430,6 +527,34 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
   },
+  guestsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  guestsLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  guestsControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  guestButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  guestCount: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginHorizontal: 12,
+    color: '#333333',
+  },
   priceRangeLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -447,6 +572,25 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 8,
     textAlign: 'center',
+  },
+  roomTypeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  roomTypeButton: {
+    width: '32%',
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  roomTypeText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  instantBookOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   propertyTypeGrid: {
     flexDirection: 'row',
